@@ -1,0 +1,146 @@
+# This file is used to explain the meaning of the SurfDock parameters.
+# If you want to learn more about the options available for these parameters, please refer ./utils/parsing.py file
+# If the user wants to retrain the model, they can pick the right parameters to optimize in their own way
+## General arguments
+# CUDA optimization parameter for faster training
+cudnn_benchmark: true
+# use pin_memory or not in linux system
+pin_memory: false
+# restart dir for training, which storge the model and optimizer
+restart_dir: ~/SurfDock/workdir/project_surface_V3_PDBBind_ema_model_pocket_8A
+# restart learning rate
+restart_lr: null
+
+## dataset
+# training data dir
+data_dir: ~/PDBBIND/PDBBind_pocket_8A/
+# cache path for training data, if you just use SurfDock, you can ignore this
+cache_path: ~/PDBBIND/cache_Surface_PDBBIND_pocket_8A
+# esm embedding path,if this is set then the LM embeddings at that path will be used for the receptor features
+esm_embeddings_path: ~/PDBBIND/esm_embedding/esm_embedding_pocket_for_train/esm2_3billion_embeddings.pt
+# dataset split file
+split_test: ~/data/splits/timesplit_test
+split_train: ~/data/splits/timesplit_no_lig_overlap_train
+split_val: ~/data/splits/timesplit_no_lig_overlap_val
+# use rmsd matching or not,use default value is fine
+matching: true
+# Differential evolution maxiter parameter in matching
+matching_maxiter: 20
+# the number of workers for dataloader
+num_dataloader_workers: 1
+# the number of complexes to inference in validation set
+num_inference_complexes: 500
+# the number of workers for training
+num_workers: 1
+
+## model 
+# if you want to use dynamic max cross, you can set this to true. this parameter can set a different max cross distance for each timestep
+dynamic_max_cross: true
+# scale the noise by sigma or not
+scale_by_sigma: true
+# Maximum sigma for rotational component
+rot_sigma_max: 1.55
+# Minimum sigma for rotational component
+rot_sigma_min: 0.03
+# Maximum sigma for torsional component
+tor_sigma_max: 3.14
+# Minimum sigma for torsional component
+tor_sigma_min: 0.0314
+# Maximum sigma for translational component
+tr_sigma_max: 5.0
+# Minimum sigma for translational component
+tr_sigma_min: 0.1
+# the weight of torsional component loss
+tor_weight: 0.33
+# the weight of translational component loss
+tr_weight: 0.33
+# the weight of rotational component loss
+rot_weight: 0.33
+# diffusion model type , default value is surface_score_model,when train a scoring model, you can use mdn_model
+model_type: surface_score_model
+# diffusion model version, use default value is 3
+model_version: version3
+# training epochs
+n_epochs: 2000
+# number of gaussians which used to MDN module for socring module 
+n_gaussians: 20
+# use no batch norm or not
+no_batch_norm: false
+# use torsion or not ,default value is false
+no_torsion: false
+# the layer number of the model
+num_conv_layers: 6
+# the dimension of the scalar embedding in e3nn
+ns: 48
+# the dimension of the vector embedding in e3nn
+nv: 10
+# use the second order representation or not
+use_second_order_repr: false
+# embedding type
+embedding_type: sinusoidal
+# max number of neighbors for each atom in ligand graph
+max_radius: 5.0
+batch_size: 12 # batch size
+# the radius of the receptor graph
+receptor_radius: 15.0
+# max number of neighbors for each C-alpha atom(residue graph)
+c_alpha_max_neighbors: 24 
+# Maxximum inter-distance about different node types
+cross_max_distance: 80
+# cross distance embed dimension
+cross_distance_embed_dim: 32
+# intra-distance embed dimension
+distance_embed_dim: 32
+# Size of the embedding of the diffusion time
+sigma_embed_dim: 32
+# Parameter of the diffusion time embedding
+embedding_scale: 1000
+# dropout rate for dropout layer in diffusion module
+dropout: 0.1
+# the dropout rate for scoring module
+mdn_dropout: 0.1
+# use the ema model or not
+use_ema: false
+# exponential moving average rate
+ema_rate: 0.999
+# learning rate ,use default value is fine
+lr: 0.001
+# the learning rate scheduler
+scheduler: plateau
+# the weight decay factor, use default value is fine
+w_decay: 0.0
+# the patience of the learning rate scheduler
+scheduler_patience: 50
+# earlystop goal use max or min
+inference_earlystop_goal: max
+# inference earlystop metric
+inference_earlystop_metric: valinf_rmsds_lt2
+# denoise steps in inference stage
+inference_steps: 20
+# the early stop goal for training scoring module
+mdn_early_stop_patience: 30
+# remove hydrogen or not
+remove_hs: true
+# validation inference frequency,default is 20 epochs
+val_inference_freq: 20
+# top-N atoms with the smallest distances with surface node for mdn calculate in scoring model
+topN: 1
+# predict bond type or not in training scoring model stage
+bond_type_prediction: true
+# atom type prediction or not in training scoring model stage
+atom_type_prediction: true
+
+## wandb log
+# use wandb to log or not
+wandb: true
+# wandb dir
+wandb_dir: ~/wandb/SurfDock
+# the project name in wandb
+project: SurfDock_V3_PDBBind_ema_model_pocket_8A
+# the run name in wandb
+run_name: project_surface_V3_PDBBind_ema_model_pocket_8A
+# dir of log files
+log_dir: ~/wandb/SurfDock/workdir
+
+
+
