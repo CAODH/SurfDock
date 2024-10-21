@@ -45,7 +45,7 @@ mamba install loguru
 pip install dimorphite_dl
 pip install prefetch_generator
 ```
-#### Tips.1 **if you have some error about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
+#### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
 ### Masif & data processed env dependencies
 mamba install mx::reduce
 mamba install conda-forge::openbabel
