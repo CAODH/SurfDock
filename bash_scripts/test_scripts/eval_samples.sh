@@ -12,7 +12,7 @@ cat << 'EOF'
 EOF
                                                                                                        
 # This script is used to run SurfDock on test samples
-source ~/miniforge3/bin/activate SurfDcok
+source ~/miniforge3/bin/activate SurfDock
 path=$(readlink -f "$0")
 SurfDockdir="$(dirname "$(dirname "$(dirname "$path")")")"
 SurfDockdir=${SurfDockdir}
