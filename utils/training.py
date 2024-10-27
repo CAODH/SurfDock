@@ -344,8 +344,7 @@ def inference_epoch_parallel(model, complex_graphs, device, t_to_sigma, args,acc
             filterHs = torch.not_equal(predict_graph['ligand'].x[:, 0], 0)
             ligand_pos = predict_graph['ligand'].pos[filterHs].to(model.device)
             orig_ligand_pos = orig_graph['ligand'].pos[filterHs].to(model.device)
-            # logger.info(f'{ligand_pos} ,{orig_ligand_pos}')
-            rmsd = torch.sqrt(((ligand_pos - orig_ligand_pos) ** 2).sum())
+            rmsd = torch.sqrt(((ligand_pos - orig_ligand_pos) ** 2).sum()/(ligand_pos.shape[0]))
             rmsds.append(rmsd)
     rmsds = torch.stack(rmsds)
 
