@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="torch.jit._check")
 import copy
 import math
 import os
