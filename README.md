@@ -1,5 +1,5 @@
-# SurfDock is a Surface-Informed Diffusion Generative Model for Reliable and Accurate Protein-ligand Complex Prediction
-<div style="background-image: figs/docking.gif; color: white; text-shadow: 2px 2px black;">
+# [SurfDock is a Surface-Informed Diffusion Generative Model for Reliable and Accurate Protein-ligand Complex Prediction](https://doi.org/10.1038/s41592-024-02516-y)
+
 
 Implementation of SurfDock, by Duanhua Cao & Mingan Chen.
 
@@ -120,6 +120,9 @@ Same as the previous step
 
 
 ## Section 8 : Citation
+Cao, D., Chen, M., Zhang, R. et al. SurfDock is a surface-informed diffusion generative model for reliable and accurate protein–ligand complex prediction. Nat Methods (2024). 
+https://doi.org/10.1038/s41592-024-02516-y
+
 
 Cao D, Chen M, Zhang R, et al. SurfDock is a Surface-Informed Diffusion Generative Model for Reliable and Accurate Protein-ligand Complex Prediction[J]. bioRxiv, 2023: 2023.12. 13.571408.
 
