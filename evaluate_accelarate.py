@@ -22,6 +22,7 @@ from utils.sampling import randomize_position, sampling
 from utils.utils import get_model, get_symmetry_rmsd, remove_all_hs, read_strings_from_txt, ExponentialMovingAverage
 from utils.visualise import PDBFile
 from tqdm import tqdm
+from loguru import logger
 torch.multiprocessing.set_sharing_strategy('file_system')
 RDLogger.DisableLog('rdApp.*')
 import yaml
@@ -106,7 +107,7 @@ def main_function():
                 confidence_args.mdn_dist_threshold_train =7.0
 
     if args.force_optimize:
-        print('Using ForceField for energy minimized!')
+        logger.info('Using ForceField for energy minimized!')
     test_dataset = PDBBind(transform=None, root=args.data_dir, limit_complexes=args.limit_complexes,
                         receptor_radius=score_model_args.receptor_radius,
                         cache_path=args.cache_path, split_path=args.split_path,
@@ -126,7 +127,7 @@ def main_function():
     if args.confidence_model_dir is not None:
         if not (confidence_args.use_original_model_cache or confidence_args.transfer_weights):
             # if the confidence model uses the same type of data as the original model then we do not need this dataset and can just use the complexes
-            print('HAPPENING | confidence model uses different type of graphs than the score model. Loading (or creating if not existing) the data for the confidence model now.')
+            logger.info('HAPPENING | confidence model uses different type of graphs than the score model. Loading (or creating if not existing) the data for the confidence model now.')
             confidence_test_dataset = PDBBind(transform=None, root=args.data_dir, limit_complexes=args.limit_complexes,
                                     receptor_radius=confidence_args.receptor_radius,
                                 cache_path=args.cache_path, split_path=args.split_path,
@@ -157,7 +158,7 @@ def main_function():
             model.load_state_dict(state_dict, strict=False)
             model = model.to(device)
             model.eval()
-            print('loaded model weight for score model')
+            logger.info('loaded model weight for score model')
         if args.confidence_model_dir is not None:
             if confidence_args.transfer_weights:
                 with open(f'{confidence_args.original_model_dir}/model_parameters.yml') as f:
@@ -179,7 +180,7 @@ def main_function():
     tr_schedule = get_t_schedule(inference_steps=args.inference_steps)
     rot_schedule = tr_schedule
     tor_schedule = tr_schedule
-    print('t schedule', tr_schedule)
+    logger.info('t schedule', tr_schedule)
 
     rmsds_list, obrmsds, centroid_distances_list, failures, skipped, min_cross_distances_list, base_min_cross_distances_list, confidences_list, names_list = [], [], [], 0, 0, [], [], [], []
     run_times, min_self_distances_list, without_rec_overlap_list = [], [], []
@@ -189,7 +190,7 @@ def main_function():
     name_map_idx = {name: idx for idx, name in enumerate(names_test_all)}
     idx_map_name = {idx: name for idx, name in enumerate(names_test_all)}
 
-    print('Size of test dataset: ', len(test_dataset))
+    logger.info('Size of test dataset: ', len(test_dataset))
 
     model = accelerator.prepare(model)
     test_loader= accelerator.prepare(test_loader)
@@ -199,7 +200,7 @@ def main_function():
         if confidence_model is not None and not (confidence_args.use_original_model_cache or
                                                 confidence_args.transfer_weights) and orig_complex_graph.name[0] not in confidence_complex_dict.keys():
             skipped += 1
-            print(f"HAPPENING | The confidence dataset did not contain {orig_complex_graph.name[0]}. We are skipping this complex.")
+            logger.info(f"HAPPENING | The confidence dataset did not contain {orig_complex_graph.name[0]}. We are skipping this complex.")
             continue
         success = 0
         sample_count_failed = 0
@@ -230,8 +231,8 @@ def main_function():
                         pdb.add(lig, 0, 0)
                         # pose rdkit matching
                         pdb.add((orig_complex_graph['ligand'].pos + orig_complex_graph.original_center).detach().cpu(), 1, 0)
-                        # print(orig_complex_graph['ligand'].pos.shape,orig_complex_graph.original_center.shape)
-                        # print(graph['ligand'].pos.device,graph.original_center.device)
+                        # logger.info(orig_complex_graph['ligand'].pos.shape,orig_complex_graph.original_center.shape)
+                        # logger.info(graph['ligand'].pos.device,graph.original_center.device)
                         # random rdkit matching
                         pdb.add((graph['ligand'].pos + (graph.original_center).detach().cpu()), part=1, order=1)
                         visualization_list.append(pdb)
@@ -288,7 +289,7 @@ def main_function():
                     mol = remove_all_hs(orig_complex_graph.mol[0])
                     rmsd = get_symmetry_rmsd(mol, orig_ligand_pos[0], [l for l in ligand_pos])
                 except Exception as e:
-                    print("Using non corrected RMSD because of the error", e)
+                    logger.info("Using non corrected RMSD because of the error", e)
                     rmsd = np.sqrt(((ligand_pos - orig_ligand_pos) ** 2).sum(axis=2).mean(axis=1))
                 rmsds_list.append(rmsd)
                 centroid_distance = np.linalg.norm(ligand_pos.mean(axis=1) - orig_ligand_pos.mean(axis=1), axis=1)
@@ -297,13 +298,13 @@ def main_function():
                 if confidence is not None:
                     confidence = np.array(confidence)#.cpu().numpy()
                     re_order = np.argsort(confidence)[::-1]
-                    # print(confidence, re_order,rmsd)
-                    print(orig_complex_graph['name'], ' rmsd', np.around(rmsd, 1)[re_order], ' centroid distance',
+                    # logger.info(confidence, re_order,rmsd)
+                    logger.info(orig_complex_graph['name'], ' rmsd', np.around(rmsd, 1)[re_order], ' centroid distance',
                         np.around(centroid_distance, 1)[re_order], ' confidences ', np.around(confidence, 4)[re_order])
                     confidences_list.append(confidence)
 
                 else:
-                    print(orig_complex_graph['name'], ' rmsd', np.around(rmsd, 1), ' centroid distance',
+                    logger.info(orig_complex_graph['name'], ' rmsd', np.around(rmsd, 1), ' centroid distance',
                         np.around(centroid_distance, 1))
                     
                 """ add a save command by caoduanhua to save the last state of ligand"""
@@ -353,11 +354,11 @@ def main_function():
                 without_rec_overlap_list.append(1 if orig_complex_graph.name[0] in names_no_rec_overlap else 0)
                 names_list.append(name_map_idx[orig_complex_graph.name[0]])
             except Exception as e:
-                print("Failed on", orig_complex_graph["name"], e)
+                logger.info("Failed on", orig_complex_graph["name"], e)
                 failures += 1
                 sample_count_failed +=1
                 if sample_count_failed > 5:
-                    print(" Skip by five times Failed on", orig_complex_graph["name"], e)
+                    logger.info(" Skip by five times Failed on", orig_complex_graph["name"], e)
                     success = 1
                 else:
                     success = 0
@@ -376,9 +377,9 @@ def main_function():
     accelerator.wait_for_everyone()
     if accelerator.is_local_main_process:
 
-        print('Performance without hydrogens included in the loss')
-        print(failures, "failures due to exceptions")
-        print(skipped, ' skipped because complex was not in confidence dataset')
+        logger.info('Performance without hydrogens included in the loss')
+        logger.info(failures, "failures due to exceptions")
+        logger.info(skipped, ' skipped because complex was not in confidence dataset')
         performance_metrics = {}
         for overlap in ['', 'no_overlap_']:
             if 'no_overlap_' == overlap:
@@ -617,7 +618,7 @@ def main_function():
                     })
 
         for k in performance_metrics:
-            print(k, performance_metrics[k])
+            logger.info(k, performance_metrics[k])
 
         if args.wandb:
             wandb.log(performance_metrics)
@@ -651,6 +652,6 @@ if __name__ == '__main__':
     from accelerate.utils import set_seed
     device = accelerator.device
     set_seed(1024)
-    accelerator.print(f'device {str(accelerator.device)} is used!')
+    accelerator.logger.info(f'device {str(accelerator.device)} is used!')
     main_function()
     # sys.exit()

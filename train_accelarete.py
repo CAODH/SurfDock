@@ -32,16 +32,17 @@ def train(args, model, optimizer, scheduler,  ema_weights,train_loader, val_load
                       tor_weight=args.tor_weight, no_torsion=args.no_torsion)
     if accelerator.is_local_main_process:
         logger.info("Starting training...")
-    logger.info('Load val inference dataset ...')
+        
+        logger.info('Load val inference dataset ...')
     val_inference_datalist = val_loader.dataset.get_complexs_list(args.num_inference_complexes)
-    logger.info(f'Size of dataset is : {len(val_inference_datalist)}.')
-
+    if accelerator.is_local_main_process:
+        logger.info(f'Size of dataset is : {len(val_inference_datalist)}.')
+    scheduler.scheduler.num_bad_epochs = 1
     for epoch in range(args.n_epochs):
         if accelerator.is_local_main_process:
             if epoch % 5 == 0: logger.info(f"Run name: {args.run_name}")
         logs = {}
         #################trainging ########################
-        # logger.info('model type',model.__class__.__name__)
         # logger.info('model intance',isinstance(model,TensorProductEnergyModel))
         train_losses = train_epoch(model, train_loader, optimizer, device, t_to_sigma, loss_fn,accelerator,ema_weights)
         # accelerator.wait_for_everyone()
@@ -55,7 +56,7 @@ def train(args, model, optimizer, scheduler,  ema_weights,train_loader, val_load
         # unwrapped_model = accelerator.unwrap_model(model)
         ema_weights.store(model.parameters())
         if args.use_ema: ema_weights.copy_to(model.parameters()) # load ema parameters into model for running validation and inference
-        ############### training end#######################
+        ############### trainging end#######################
 
         val_losses = test_epoch(model, val_loader, device, t_to_sigma, loss_fn, accelerator,args.test_sigma_intervals,model_type=args.model_type)
         #####################
@@ -66,16 +67,16 @@ def train(args, model, optimizer, scheduler,  ema_weights,train_loader, val_load
             logger.info("Epoch {}: Validation loss {:.4f}  tr {:.4f}   rot {:.4f}   tor {:.4f}"
                 .format(epoch, val_losses['loss'], val_losses['tr_loss'], val_losses['rot_loss'], val_losses['tor_loss']))
         if args.val_inference_freq != None and (epoch + 1) % args.val_inference_freq == 0 and (epoch + 1) > args.skip_inference_freq:
+            
             inf_metrics = inference_epoch_parallel(model, val_inference_datalist, device, t_to_sigma, args,accelerator)
-            # accelerator.wait_for_everyone()
             if accelerator.is_local_main_process:
                 nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 logger.info(f"epoch【{epoch}】@{nowtime} --> inference_metric=")
                 logger.info("Epoch {}: Val inference rmsds_lt2 {:.3f} rmsds_lt5 {:.3f}"
                     .format(epoch, inf_metrics['rmsds_lt2'], inf_metrics['rmsds_lt5']))
-                logs.update({'valinf_' + k: v for k, v in inf_metrics.items()}, step=epoch + 1)
-        # accelerator.save(unwrapped_model.state_dict(), filename)
-        # accelerator.wait_for_everyone()
+                
+            logs.update({'valinf_' + k: v for k, v in inf_metrics.items()}, step=epoch + 1)
+
         if not args.use_ema: ema_weights.copy_to(model.parameters())
         accelerator.wait_for_everyone()
         # ema weight state dict
@@ -87,37 +88,42 @@ def train(args, model, optimizer, scheduler,  ema_weights,train_loader, val_load
         unwrapped_model = accelerator.unwrap_model(model)
         # ema_state_dict = copy.deepcopy(unwrapped_model.state_dict() if device.type == 'cuda' else unwrapped_model.state_dict())
         state_dict = unwrapped_model.state_dict() if device.type == 'cuda' else unwrapped_model.state_dict()
-        if accelerator.is_local_main_process:
-            # accelerator.wait_for_everyone()
-            if args.wandb:
-                logs.update({'train_' + k: v for k, v in train_losses.items()})
-                logs.update({'val_' + k: v for k, v in val_losses.items()})
-                logs['current_lr'] = optimizer.param_groups[0]['lr']
-                wandb.log(logs, step=epoch + 1)
-            
-            if args.inference_earlystop_metric in logs.keys() and \
-                    (args.inference_earlystop_goal == 'min' and logs[args.inference_earlystop_metric] <= best_val_inference_value or
-                    args.inference_earlystop_goal == 'max' and logs[args.inference_earlystop_metric] >= best_val_inference_value):
-                best_val_inference_value = logs[args.inference_earlystop_metric]
-                best_val_inference_epoch = epoch
+        
+        logs.update({'train_' + k: v for k, v in train_losses.items()})
+        logs.update({'val_' + k: v for k, v in val_losses.items()})
+        logs['current_lr'] = optimizer.param_groups[0]['lr']
+        
+        if args.wandb and accelerator.is_local_main_process:
+            wandb.log(logs, step=epoch + 1)
+       
+
+        if args.inference_earlystop_metric in logs.keys() and \
+                (args.inference_earlystop_goal == 'min' and logs[args.inference_earlystop_metric] <= best_val_inference_value or
+                args.inference_earlystop_goal == 'max' and logs[args.inference_earlystop_metric] >= best_val_inference_value):
+            best_val_inference_value = logs[args.inference_earlystop_metric]
+            best_val_inference_epoch = epoch
+            if accelerator.is_local_main_process:
                 torch.save(state_dict, os.path.join(run_dir, 'best_inference_epoch_model.pt'))
                 torch.save(ema_state_dict, os.path.join(run_dir, 'best_ema_inference_epoch_model.pt'))
-            if val_losses['loss'] <= best_val_loss:
-                best_val_loss = val_losses['loss']
-                best_epoch = epoch
+            
+        if val_losses['loss'] <= best_val_loss:
+            best_val_loss = val_losses['loss']
+            best_epoch = epoch
+            if accelerator.is_local_main_process:
                 torch.save(state_dict, os.path.join(run_dir, 'best_model.pt'))
                 torch.save(ema_state_dict, os.path.join(run_dir, 'best_ema_model.pt'))
-
-        if scheduler:
+        
+        if scheduler and (epoch + 1) % args.val_inference_freq == 0 and (epoch + 1) > args.skip_inference_freq:
             if args.val_inference_freq is not None and (epoch + 1) > args.skip_inference_freq:
-                if accelerator.is_local_main_process:
-                    logger.info("Scheduler Step on Epoch: {} With best_val_inference_value: {}".format(epoch + 1, best_val_inference_value))
+
                 scheduler.step(best_val_inference_value)
+                
             else:
-                # max is min
-                if accelerator.is_local_main_process:
-                    logger.info("Scheduler Step on Epoch: {} With best_val_loss_value: {}, epoch val loss".format(epoch + 1,best_val_loss, val_losses['loss']))
+
                 scheduler.step(-1*val_losses['loss'])
+            if scheduler.scheduler.num_bad_epochs < accelerator.num_processes:
+                scheduler.scheduler.num_bad_epochs = 1
+
         if accelerator.is_local_main_process:
             # accelerator.wait_for_everyone()
             # unwrapped_optimizer = accelerator.unwrap_model(optimizer)
@@ -132,7 +138,7 @@ def train(args, model, optimizer, scheduler,  ema_weights,train_loader, val_load
         logger.info("Best Validation Loss {} on Epoch {}".format(best_val_loss, best_epoch))
         logger.info("Best inference metric {} on Epoch {}".format(best_val_inference_value, best_val_inference_epoch))
     if args.wandb:
-            wandb.finish()
+        wandb.finish()
 
 # from accelerate.utils import DummyOptim, DummyScheduler, set_seed
 def main_function():
