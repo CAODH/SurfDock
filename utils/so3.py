@@ -61,7 +61,7 @@ else:
     _score_norms = np.asarray([_score(_exp_vals[i], _omegas_array, _eps_array[i]) for i in range(len(_eps_array))])
 
     _exp_score_norms = np.sqrt(np.sum(_score_norms**2 * _pdf_vals, axis=1) / np.sum(_pdf_vals, axis=1) / np.pi)
-
+    os.makedirs(tmp_path, exist_ok=True)
     np.save(os.path.join(tmp_path,'.so3_omegas_array2.npy'), _omegas_array)
     np.save(os.path.join(tmp_path,'.so3_cdf_vals2.npy'), _cdf_vals)
     np.save(os.path.join(tmp_path,'.so3_score_norms2.npy'), _score_norms)

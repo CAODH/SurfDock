@@ -17,6 +17,7 @@ from score_in_place_dataset.score_dataset import ScreenDataset
 # from utils.sampling import randomize_position, sampling
 from utils.utils import get_model
 from tqdm import tqdm
+from loguru import logger
 RDLogger.DisableLog('rdApp.*')
 import yaml
 cache_name = datetime.now().strftime('date%d-%m_time%H-%M-%S.%f')
@@ -117,7 +118,7 @@ def main_function():
     pbar = tqdm(zip(pocket_paths,ligands_paths,ref_ligands,surface_paths),total=len(pocket_paths))
     for pocket_path,ligands_path,ref_ligand,surface_path in pbar:
         try:
-            esm_embeddings = esm_embeddings_dict[pocket_path.split('/')[-1].split('_pocket')[0]]
+            esm_embeddings = esm_embeddings_dict[os.path.splitext(os.path.basename(pocket_path))[0]]
             # assert False, f'esmembedding shape : {esm_embeddings.shape}'
             test_dataset = ScreenDataset(pocket_path,ligands_path,ref_ligand,surface_path,transform=None,
                                 receptor_radius=confidence_args.receptor_radius,
@@ -137,7 +138,7 @@ def main_function():
             if len(test_dataset) == 0:
                 continue
             test_loader= accelerator.prepare(test_loader)
-            print('Size of test dataset: ', len(test_dataset))
+            logger.info('Size of test dataset: ', len(test_dataset))
             with torch.no_grad():
                 confidence_model.eval()
                 for confidence_complex_graph_batch in tqdm(test_loader,total = len(test_loader)):
@@ -145,13 +146,13 @@ def main_function():
                     confidence_names += confidence_complex_graph_batch['name']
                     sdf_names += [os.path.basename(ligands_path)]*len(confidence_complex_graph_batch['name'])
                     assert len(confidence)==len(confidence_names)==len(sdf_names)
-                    # print(len(confidence_complex_graph_batch['name'][0]),len(confidence_complex_graph_batch['name']),confidence_complex_graph_batch['name'][0])
+                    # logger.info(len(confidence_complex_graph_batch['name'][0]),len(confidence_complex_graph_batch['name']),confidence_complex_graph_batch['name'][0])
         except Exception as e:
-            print(e,'some error failed for : ',ligands_path)
+            logger.info(e,'some error failed for : ',ligands_path)
             continue
             # if accelerator.is_local_main_process:
         pbar.set_description('screen time used: {:.2f} '.format(time.time()-start_time))
-    print('screen time used: ',time.time()-start_time)
+    logger.info('screen time used: ',time.time()-start_time)
     if accelerator.is_local_main_process:
         result = pd.DataFrame({'sdf_name':sdf_names,'confidence':confidence,'confidence_name':confidence_names})
         csv_flag = os.path.basename(args.data_csv).split('.')[0]

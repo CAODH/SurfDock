@@ -14,6 +14,8 @@ __pycache__/
 ./*/*.LOG
 ./*/*.txt
 **/*.txt
+esm
+esm/*
 # C extensions
 *.so
 .so3_*

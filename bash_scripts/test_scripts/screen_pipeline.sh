@@ -19,6 +19,7 @@ SurfDockdir=${SurfDockdir}
 echo SurfDockdir : ${SurfDockdir}
 
 temp="$(dirname "$(dirname "$(dirname "$(dirname "$path")")")")"
+model_temp="$(dirname "$(dirname "$(dirname "$path")")")"
 
 #------------------------------------------------------------------------------------------------#
 #------------------------------------ Step1 : Setup Params --------------------------------------#
@@ -32,7 +33,7 @@ NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
 
 main_process_port=2951${gpu_array[-1]}
-project_name='SurfDock_Screen_samples/repeat7'
+project_name='SurfDock_Screen_samples/repeat_zero'
 surface_out_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_8A_surface
 data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
 out_csv_file=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/input_csv_files/test_samples.csv
@@ -42,6 +43,7 @@ esmbedding_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_sampl
 #------------------------------------------------------------------------------------------------#
 #----------------------------- Step1 : Compute Target Surface -----------------------------------#
 #------------------------------------------------------------------------------------------------#
+echo '----------------------------- Step1 : Compute Target Surface -----------------------------------'
 mkdir -p $surface_out_dir
 cd $surface_out_dir
 command=`
@@ -54,6 +56,7 @@ state=$command
 #------------------------------------------------------------------------------------------------#
 #--------------------------------  Step2 : Get Input CSV File -----------------------------------#
 #------------------------------------------------------------------------------------------------#
+echo '--------------------------------  Step2 : Get Input CSV File -----------------------------------'
 
 command=` python \
 ${SurfDockdir}/inference_utils/construct_csv_input.py \
@@ -67,6 +70,7 @@ state=$command
 #------------------------------------------------------------------------------------------------#
 #--------------------------------  Step3 : Get Pocket ESM Embedding  ----------------------------#
 #------------------------------------------------------------------------------------------------#
+echo '--------------------------------  Step3 : Get Pocket ESM Embedding  ----------------------------'
 
 esm_dir=${SurfDockdir}/esm
 sequence_out_file="${esmbedding_dir}/test_samples.fasta"
@@ -82,7 +86,7 @@ state=$command
 # esm embedding preprateion
 
 command=`python ${esm_dir}/scripts/extract.py \
-"${esm_dir}/model_weights/.cache/torch/hub/checkpoints/esm2_t33_650M_UR50D.pt" \
+"esm2_t33_650M_UR50D" \
 ${sequence_out_file} \
 ${full_protein_esm_embedding_dir} \
 --repr_layers 33 \
@@ -105,11 +109,13 @@ command=`python ${SurfDockdir}/datasets/esm_pocket_embeddings_to_pt.py \
 state=$command
 
 #------------------------------------------------------------------------------------------------#
-#------------------------  Step3 : Start Sampling Ligand Confromers  ----------------------------#
+#---------------- Step3 : Start Sampling Ligand Confromers without Force Optimize  -----------------#
 #------------------------------------------------------------------------------------------------#
+echo '---------------- Attention : Start Sampling Ligand Confromers with Force Optimize  -----------------'
+echo '---------------- If you want to minimized top 10 pose as we do in paper please use the script in ~/SurfDock/force_optimize  -----------------'
 
-diffusion_model_dir=${temp}/model_weights/docking
-confidence_model_base_dir=${temp}/model_weights/posepredict
+diffusion_model_dir=${model_temp}/model_weights/docking
+confidence_model_base_dir=${model_temp}/model_weights/posepredict
 protein_embedding=${pocket_emb_save_to_single_file}
 test_data_csv=${out_csv_file}
 cd ${SurfDockdir}/bash_scripts/test_scripts
@@ -136,8 +142,8 @@ ${SurfDockdir}/inference_accelerate.py \
 --run_name ${confidence_model_base_dir}_test_dist_${mdn_dist_threshold_test} \
 --project ${project_name} \
 --out_dir ${temp}/docking_result/${project_name} \
---batch_size 1000 \
---batch_size_molecule 25 \
+--batch_size 400 \
+--batch_size_molecule 10 \
 --samples_per_complex 40 \
 --save_docking_result_number 40 \
 --head_index  0 \
@@ -146,6 +152,57 @@ ${SurfDockdir}/inference_accelerate.py \
 --wandb_dir ${temp}/docking_result/test_workdir`
 state=$command
 done
+#------------------------------------------------------------------------------------------------#
+#---------------- Step4 : Start Rescoring the Pose For Screening  -----------------#
+#------------------------------------------------------------------------------------------------#
+echo '---------------- Step4 : Start Rescoring the Pose For Screening  -----------------'
+project_name='SurfDock_Screen_samples/repeat_zero'
+
+# surface_out_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_8A_surface
+# data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
+out_csv_file=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/input_csv_files/score_inplace.csv
+
+command=` python \
+${SurfDockdir}/inference_utils/construct_csv_input.py \
+--data_dir ${data_dir} \
+--surface_out_dir ${surface_out_dir} \
+--output_csv_file ${out_csv_file} \
+--Screen_ligand_library_file ${SurfDockdir}/data/Screen_sample_dirs/test_samples/1a0q/1a0q_ligand_for_Screen.sdf \
+--is_docking_result_dir \
+--docking_result_dir ${temp}/docking_result/${project_name} \
+`
+state=$command
+
+confidence_model_base_dir=${model_temp}/model_weights/screen
+
+test_data_csv=${out_csv_file}
+
+version=6
+dist_arrays=(5)
+for i in ${dist_arrays[@]}
+do
+mdn_dist_threshold_test=${i}
+echo mdn_dist_threshold_test : ${mdn_dist_threshold_test}
+
+command=`accelerate launch \
+--multi_gpu \
+--main_process_port ${main_process_port} \
+--num_processes 1 \
+${SurfDockdir}/evaluate_score_in_place.py \
+--data_csv ${test_data_csv} \
+--confidence_model_dir ${confidence_model_base_dir} \
+--confidence_ckpt best_model.pt \
+--model_version version6 \
+--mdn_dist_threshold_test ${mdn_dist_threshold_test} \
+--esm_embeddings_path ${protein_embedding} \
+--run_name ${project_name}_test_dist_${mdn_dist_threshold_test} \
+--project ${project_name} \
+--out_dir ${temp}/docking_result/${project_name} \
+--batch_size 40 \
+--wandb_dir ${temp}/wandb/test_workdir`
+state=$command
+done
+
 cat << 'EOF'
   ____  _     _ _   _ _   _ ____  _     _____ ____  _   _ ____  _     _     ____  _     ____  _        _ 
   ____              __ ____             _      ____                        _ _               ____                   _  

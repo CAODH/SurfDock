@@ -5,9 +5,12 @@ Implementation of SurfDock, by Duanhua Cao & Mingan Chen.
 
 This repository contains all code, instructions and model weights necessary to **Generative Reliable and Accurate Protein-ligand Complex and Screen Compounds** by SurfDock, eval SurfDock or to retrain a new model.
 ### 🔔 News
-1. **Duanhua have performed several engineering optimizations on SurfDock, enabling it to dock multiple molecules in the same batch. Moreover, our code supports multi-GPU parallel computation. Test on 8*H800(80G), our speed about 0.417s/molecule (40 pose with 20 denoise steps). Enjoy it**
+***With just a few adjustments to the input files based on your needs, you can seamlessly leverage the advanced diffusion model for structure-based virtual screening!***
 
-2. **We have added an “example.yml” file in params_example dir to our code repository, detailing the parameters used. This is intended to help users select parameters that are best suited for their tasks, whether they wish to retrain the model, fine-tune our model, or use it directly.**
+1. **We have updated the README file to include instructions for the installation scripts.**
+
+2. **We have added a ***Screen Pipeline*** bash script to assist researchers in directly using SurfDock for virtual screening.(~/SurfDock/bash_scripts/test_scripts/screen_pipeline.sh)**
+
 **More infomations in Section 3**
 
 If you have any question, feel free to open an issue or reach out to us: [caodh@zju.edu.cn](caodh@zju.edu.cn).
@@ -45,6 +48,14 @@ mamba install loguru
 pip install dimorphite_dl
 pip install prefetch_generator
 ```
+Please also install esm for embeddings
+
+```
+bash
+git clone https://github.com/facebookresearch/esm
+cd esm
+pip install -e .
+```
 #### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
 ### Masif & data processed env dependencies
 mamba install mx::reduce
@@ -65,7 +76,7 @@ mamba install conda-forge::openbabel
 
 In our code directory, we write many bash scripts to help user to run SurfDock ,you just follow the example file to adjust the file path ,and then run the specific bash file !
 pleas run:
-`cd /root/capsule/SurfDock/bash_scripts/test_scripts/`
+`cd ~/SurfDock/bash_scripts/test_scripts/`
 `bash eval_samples.sh`
 if you want to use the wandb to record the result ,please set the next parameters:
     --wandb 
@@ -76,7 +87,7 @@ Finanly, check the result in the relative path (which you can find in the Dockin
 ## Section 5: Running SurfDock to Screen compund
 
 a sample run:
-`cd /root/capsule/SurfDock/bash_scripts/test_scripts/`
+`cd ~/SurfDock/bash_scripts/test_scripts/`
 `bash screen_samples.sh`
 if you want to use the wandb to record the result ,please set the next parameters:
     --wandb 
@@ -89,9 +100,6 @@ Finanly, check the result (a csv file include the result DIR) in the out_dir pat
 If you want to retrain your SurfDock, please Download the data and place it as described in the "Dataset" section above.
 since we need esm model to get embedding, we need to install esm model before retarining the SurfDock
 
-`git clone https://github.com/facebookresearch/esm `
-`cd esm`
-`pip install -e .`
 
 since we also need the surface information about the protein ,so you can folloing the next links to get the surface information
 
@@ -101,12 +109,12 @@ https://github.com/LPDI-EPFL/masif
 You can follow the steps in /root/capsule/SurfDock/bash_scripts/test_scripts/eval.sh to get surface information.
 
 Then, you can prepare the esm embedding file for the protein by run the next commands:
-`cd /root/capsule/code/SurfDock/bash_scripts/train_SurfDock_docking_module`
+`cd ~/SurfDock/bash_scripts/train_SurfDock_docking_module`
 Make sure you set up all parameter files in the esm_embedding.sh 
 ` bash esm_embedding.sh`
 
 then 
-`cd /root/capsule/code/SurfDock/bash_scripts/train_SurfDock_docking_module`
+`cd ~/SurfDock/bash_scripts/train_SurfDock_docking_module`
 Make sure you set up all parameter files in the train_SurfDock.sh
 ` bash train_SurfDock.sh`
 if you want to use the wandb to record the result ,please set the next parameters in train_SurfDock.sh:

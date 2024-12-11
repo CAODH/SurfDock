@@ -22,9 +22,9 @@ temp="$(dirname "$(dirname "$(dirname "$(dirname "$path")")")")"
 model_temp="$(dirname "$(dirname "$(dirname "$path")")")"
 
 #------------------------------------------------------------------------------------------------#
-#------------------------------------ Step1 : Setup Params --------------------------------------#
+#------------------------------------ Step0 : Setup Params --------------------------------------#
 #------------------------------------------------------------------------------------------------#
-
+echo '------------------------------------ Step1 : Setup Params --------------------------------------'
 export precomputed_arrays="${temp}/precomputed/precomputed_arrays"
 gpu_string="0"
 echo "Using GPU devices: ${gpu_string}"
@@ -33,7 +33,7 @@ NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
 
 main_process_port=2951${gpu_array[-1]}
-project_name='SurfDock_eval_samples/repeat_1'
+project_name='SurfDock_eval_samples/repeat_1211'
 surface_out_dir=${SurfDockdir}/data/eval_sample_dirs/${project_name}/test_samples_8A_surface
 data_dir=${SurfDockdir}/data/eval_sample_dirs/test_samples
 out_csv_file=${SurfDockdir}/data/eval_sample_dirs/${project_name}/input_csv_files/test_samples.csv
@@ -43,7 +43,7 @@ esmbedding_dir=${SurfDockdir}/data/eval_sample_dirs/${project_name}/test_samples
 #------------------------------------------------------------------------------------------------#
 #----------------------------- Step1 : Compute Target Surface -----------------------------------#
 #------------------------------------------------------------------------------------------------#
-
+echo '----------------------------- Step1 : Compute Target Surface -----------------------------------'
 mkdir -p $surface_out_dir
 cd $surface_out_dir
 command=`
@@ -56,6 +56,7 @@ state=$command
 #------------------------------------------------------------------------------------------------#
 #--------------------------------  Step2 : Get Input CSV File -----------------------------------#
 #------------------------------------------------------------------------------------------------#
+echo '--------------------------------  Step2 : Get Input CSV File -----------------------------------'
 command=` python \
 ${SurfDockdir}/inference_utils/construct_csv_input.py \
 --data_dir ${data_dir} \
@@ -67,7 +68,7 @@ state=$command
 #------------------------------------------------------------------------------------------------#
 #--------------------------------  Step3 : Get Pocket ESM Embedding  ----------------------------#
 #------------------------------------------------------------------------------------------------#
-
+echo '--------------------------------  Step3 : Get Pocket ESM Embedding  ----------------------------'
 
 esm_dir=${SurfDockdir}/esm
 sequence_out_file="${esmbedding_dir}/test_samples.fasta"
@@ -83,7 +84,7 @@ state=$command
 # esm embedding preprateion
 
 command=`python ${esm_dir}/scripts/extract.py \
-"${esm_dir}/model_weights/.cache/torch/hub/checkpoints/esm2_t33_650M_UR50D.pt" \
+"esm2_t33_650M_UR50D" \
 ${sequence_out_file} \
 ${full_protein_esm_embedding_dir} \
 --repr_layers 33 \
@@ -107,9 +108,9 @@ state=$command
 
 
 #------------------------------------------------------------------------------------------------#
-#------------------------  Step3 : Start Sampling Ligand Confromers  ----------------------------#
+#------------------------  Step4 : Start Sampling Ligand Confromers  ----------------------------#
 #------------------------------------------------------------------------------------------------#
-
+echo '------------------------  Step3 : Start Sampling Ligand Confromers  ----------------------------'
 
 diffusion_model_dir=${model_temp}/model_weights/docking
 confidence_model_base_dir=${model_temp}/model_weights/posepredict
@@ -158,6 +159,3 @@ cat << 'EOF'
                                                                     |_|              |___/                             
   ____  _     _ _   _ _   _ ____  _     _____ ____  _   _ ____  _     _     ____  _     ____  _        _
 EOF
-
-
-
