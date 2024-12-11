@@ -88,12 +88,12 @@ Finanly, check the result in the relative path (which you can find in the Dockin
 
 a sample run:
 `cd ~/SurfDock/bash_scripts/test_scripts/`
-`bash screen_samples.sh`
+`bash screen_pipeline.sh`
 if you want to use the wandb to record the result ,please set the next parameters:
     --wandb 
     --wandb_key your_wandb_key 
     --wandb_name your_wandb_name 
-Finanly, check the result (a csv file include the result DIR) in the out_dir path (which you can find in the score_inplace.sh)
+Finanly, check the result (a csv file include the result DIR) in the out_dir path
 
 ## Section 6 : Retraining SurfDock
 
@@ -106,7 +106,7 @@ since we also need the surface information about the protein ,so you can folloin
 https://github.com/OptiMaL-PSE-Lab/DeepDock
 https://github.com/LPDI-EPFL/masif
 
-You can follow the steps in /root/capsule/SurfDock/bash_scripts/test_scripts/eval.sh to get surface information.
+You can follow the steps in ~/SurfDock/bash_scripts/test_scripts/eval_samples.sh to get surface information.
 
 Then, you can prepare the esm embedding file for the protein by run the next commands:
 `cd ~/SurfDock/bash_scripts/train_SurfDock_docking_module`
