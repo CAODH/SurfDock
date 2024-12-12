@@ -1,6 +1,6 @@
 ##############################################################################
 # MC-shell I/O capture file.
-# Creation Date and Time:  Wed Dec 11 05:17:28 2024
+# Creation Date and Time:  Thu Dec 12 06:29:45 2024
 
 ##############################################################################
 Hello world from PE 0
@@ -114,23 +114,23 @@ fillcoCharge:  Calling fillcoChargeSpline2...
 Vpmg_fillco:  filling in source term.
 Vpmg_fillco:  marking ion and solvent accessibility.
 fillcoCoef:  Calling fillcoCoefMol...
-Vacc_SASA: Time elapsed: 0.074297
+Vacc_SASA: Time elapsed: 0.082227
 Vpmg_fillco:  done filling coefficient arrays
 Vpmg_fillco:  filling boundary arrays
 Vpmg_fillco:  done filling boundary arrays
-Vnm_tstop: stopping timer 27 (Setup timer).  CPU TIME = 3.304500e-01
+Vnm_tstop: stopping timer 27 (Setup timer).  CPU TIME = 3.523070e-01
 Vnm_tstart: starting timer 28 (Solver timer)..
 Vnm_tstart: starting timer 30 (Vmgdrv2: fine problem setup)..
 Vbuildops: Fine: (097, 097, 097)
 Vbuildops: Operator stencil (lev, numdia) = (1, 4)
-Vnm_tstop: stopping timer 30 (Vmgdrv2: fine problem setup).  CPU TIME = 3.785900e-02
+Vnm_tstop: stopping timer 30 (Vmgdrv2: fine problem setup).  CPU TIME = 3.917300e-02
 Vnm_tstart: starting timer 30 (Vmgdrv2: coarse problem setup)..
 Vbuildops: Galer: (049, 049, 049)
 Vbuildops: Galer: (025, 025, 025)
 Vbuildops: Galer: (013, 013, 013)
-Vnm_tstop: stopping timer 30 (Vmgdrv2: coarse problem setup).  CPU TIME = 9.591800e-02
+Vnm_tstop: stopping timer 30 (Vmgdrv2: coarse problem setup).  CPU TIME = 1.139980e-01
 Vnm_tstart: starting timer 30 (Vmgdrv2: solve)..
-Vnm_tstop: stopping timer 40 (MG iteration).  CPU TIME = 4.909830e-01
+Vnm_tstop: stopping timer 40 (MG iteration).  CPU TIME = 5.354580e-01
 Vprtstp: iteration = 0
 Vprtstp: relative residual = 1.000000e+00
 Vprtstp: contraction number = 1.000000e+00
@@ -158,8 +158,8 @@ Vprtstp: contraction number = 1.799379e-01
 Vprtstp: iteration = 8
 Vprtstp: relative residual = 4.438507e-07
 Vprtstp: contraction number = 1.893266e-01
-Vnm_tstop: stopping timer 30 (Vmgdrv2: solve).  CPU TIME = 4.476290e-01
-Vnm_tstop: stopping timer 28 (Solver timer).  CPU TIME = 5.992960e-01
+Vnm_tstop: stopping timer 30 (Vmgdrv2: solve).  CPU TIME = 6.678950e-01
+Vnm_tstop: stopping timer 28 (Solver timer).  CPU TIME = 8.421230e-01
 Vpmg_setPart:  lower corner = (-11.7419, -7.21255, 33.9264)
 Vpmg_setPart:  upper corner = (40.069, 46.5635, 79.5646)
 Vpmg_setPart:  actual minima = (-11.7419, -7.21255, 33.9264)
@@ -174,9 +174,9 @@ Vnm_tstart: starting timer 29 (Energy timer)..
 Vpmg_energy:  calculating only q-phi energy
 Vpmg_qfEnergyVolume:  Calculating energy
 Vpmg_energy:  qfEnergy = 2.215489098079E+04 kT
-Vnm_tstop: stopping timer 29 (Energy timer).  CPU TIME = 1.442000e-03
+Vnm_tstop: stopping timer 29 (Energy timer).  CPU TIME = 1.534000e-03
 Vnm_tstart: starting timer 30 (Force timer)..
-Vnm_tstop: stopping timer 30 (Force timer).  CPU TIME = 2.000000e-06
+Vnm_tstop: stopping timer 30 (Force timer).  CPU TIME = 1.000000e-06
 Vnm_tstart: starting timer 27 (Setup timer)..
 Setting up PBE object...
 Vpbe_ctor2:  solute radius = 18.1075
@@ -231,21 +231,21 @@ fillcoCharge:  Calling fillcoChargeSpline2...
 Vpmg_fillco:  filling in source term.
 Vpmg_fillco:  marking ion and solvent accessibility.
 fillcoCoef:  Calling fillcoCoefMol...
-Vacc_SASA: Time elapsed: 0.073034
+Vacc_SASA: Time elapsed: 0.072994
 Vpmg_fillco:  done filling coefficient arrays
-Vnm_tstop: stopping timer 27 (Setup timer).  CPU TIME = 3.742060e-01
+Vnm_tstop: stopping timer 27 (Setup timer).  CPU TIME = 3.958400e-01
 Vnm_tstart: starting timer 28 (Solver timer)..
 Vnm_tstart: starting timer 30 (Vmgdrv2: fine problem setup)..
 Vbuildops: Fine: (097, 097, 097)
 Vbuildops: Operator stencil (lev, numdia) = (1, 4)
-Vnm_tstop: stopping timer 30 (Vmgdrv2: fine problem setup).  CPU TIME = 3.780900e-02
+Vnm_tstop: stopping timer 30 (Vmgdrv2: fine problem setup).  CPU TIME = 3.943100e-02
 Vnm_tstart: starting timer 30 (Vmgdrv2: coarse problem setup)..
 Vbuildops: Galer: (049, 049, 049)
 Vbuildops: Galer: (025, 025, 025)
 Vbuildops: Galer: (013, 013, 013)
-Vnm_tstop: stopping timer 30 (Vmgdrv2: coarse problem setup).  CPU TIME = 9.613000e-02
+Vnm_tstop: stopping timer 30 (Vmgdrv2: coarse problem setup).  CPU TIME = 1.131650e-01
 Vnm_tstart: starting timer 30 (Vmgdrv2: solve)..
-Vnm_tstop: stopping timer 40 (MG iteration).  CPU TIME = 1.470854e+00
+Vnm_tstop: stopping timer 40 (MG iteration).  CPU TIME = 1.780232e+00
 Vprtstp: iteration = 0
 Vprtstp: relative residual = 1.000000e+00
 Vprtstp: contraction number = 1.000000e+00
@@ -273,8 +273,8 @@ Vprtstp: contraction number = 2.036167e-01
 Vprtstp: iteration = 8
 Vprtstp: relative residual = 5.807000e-07
 Vprtstp: contraction number = 2.220089e-01
-Vnm_tstop: stopping timer 30 (Vmgdrv2: solve).  CPU TIME = 4.499040e-01
-Vnm_tstop: stopping timer 28 (Solver timer).  CPU TIME = 6.018800e-01
+Vnm_tstop: stopping timer 30 (Vmgdrv2: solve).  CPU TIME = 7.142030e-01
+Vnm_tstop: stopping timer 28 (Solver timer).  CPU TIME = 8.878120e-01
 Vpmg_setPart:  lower corner = (-11.075, -6.141, 33.9264)
 Vpmg_setPart:  upper corner = (39.402, 45.492, 79.5646)
 Vpmg_setPart:  actual minima = (-11.075, -6.141, 33.9264)
@@ -297,10 +297,10 @@ Vgrid_writeDX:  Writing to virtual socket...
 Vgrid_writeDX:  Writing comments for ASC format.
 printEnergy:  Performing global reduction (sum)
 Vcom_reduce:  Not compiled with MPI, doing simple copy.
-Vnm_tstop: stopping timer 26 (APBS WALL CLOCK).  CPU TIME = 2.237540e+00
+Vnm_tstop: stopping timer 26 (APBS WALL CLOCK).  CPU TIME = 2.815506e+00
 ##############################################################################
 # MC-shell I/O capture file.
-# Creation Date and Time:  Wed Dec 11 05:17:30 2024
+# Creation Date and Time:  Thu Dec 12 06:29:48 2024
 
 ##############################################################################
 Vgrid_readDX:  Grid dimensions 97 x 97 x 97 grid
