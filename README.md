@@ -17,26 +17,37 @@ If you have any question, feel free to open an issue or reach out to us: [caodh@
 
 ![Alt Text](figs/docking.gif)
 
-## Section 1 : Dataset
 
-The files in `data` contain the names for the time-based data split.
+## Section 1 : Setup Environment
+You can follow the instructions to setup the environment
+Our test env Info bellow
+```bash
+System Info
+-----------------------------------------
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 22.04.4 LTS
+Release:        22.04
+Codename:       jammy
+ldd --version
+ldd (Ubuntu GLIBC 2.35-0ubuntu3.8) 2.35
+-----------------------------------------
+GPU Info
+NVIDIA-SMI 545.23.06 
+Driver Version: 545.23.06
+CUDA Version: 12.3
+```
 
-If you want to train one of our models with the data then:
+**If mamba raise Errors; Please replace it to conda**
 
-1. download it from [zenodo](https://zenodo.org/record/6408497)
-2. unzip the directory and place it into `data` such that you have the path `data/PDBBind_processed`
-
-## Section 2 : Setup Environment
-
-(in CodeOcean we have setuped the environment, youcan run the bash script to use SurfDock)
-Or you can follow the instructions to setup the environment
+**Please select the appropriate version of the software based on your hardware during installation (like pytorch & cuda et.al.)**
 
 ```bash
 conda create -y -n SurfDock python==3.10
 source /opt/conda/bin/activate SurfDock
 conda install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg mamba && conda clean -ya
-mamba install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
-mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg numpy==1.20 scipy==1.8.1 pandas==2.1.2 &&conda clean -ya
+mamba install -y pytorch==2.2.2 pytorch-cuda=12.1 -c pytorch -c nvidia
+mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg numpy==1.24.4 scipy==1.8.1 pandas==2.1.2 &&conda clean -ya
 mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg openff-toolkit==0.15.2 openmm==8.1.1 openmmforcefields==0.12.0 pdbfixer==1.9 && conda clean -ya
 mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg babel==2.13.1 biopandas==0.4.1 openbabel==3.1.1 plyfile==1.0.1 prody==2.4.0 torch-ema==0.3 torchmetrics==1.2.1 && conda clean -ya
 mamba install -y pyg -c pyg
@@ -48,18 +59,36 @@ mamba install loguru
 pip install dimorphite_dl
 pip install prefetch_generator
 ```
+#### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
 Please also install esm for embeddings
 
-```
-bash
-git clone https://github.com/facebookresearch/esm
-cd esm
+```bash
+git clone https://github.com/facebookresearch/esm 
+cd esm 
 pip install -e .
 ```
-#### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
-### Masif & data processed env dependencies
+Since we need esm model to get embedding, we need to install esm model before retarining the SurfDock
+
+Since we also need the surface information about the protein ,so you can folloing the next links to get the surface information
+
+https://github.com/OptiMaL-PSE-Lab/DeepDock
+
+https://github.com/LPDI-EPFL/masif
+
+**Masif & Data processed env dependencies**
+```bash
 mamba install mx::reduce
 mamba install conda-forge::openbabel
+```
+
+## Section 2 : Dataset
+
+The files in `data` contain the names for the time-based data split.
+
+If you want to train one of our models with the data then:
+
+1. download it from [zenodo](https://zenodo.org/record/6408497)
+2. unzip the directory and place it into `data` such that you have the path `data/PDBBind_processed`
 
 ## Section 3 :  We prepared two examples as appetizers for users , users can follow these scripts to use SurfDock as a SBDD Tool.
 1. Please setup the env dependencies, then cd ~/bash_scripts/test_scripts
@@ -98,13 +127,6 @@ Finanly, check the result (a csv file include the result DIR) in the out_dir pat
 ## Section 6 : Retraining SurfDock
 
 If you want to retrain your SurfDock, please Download the data and place it as described in the "Dataset" section above.
-since we need esm model to get embedding, we need to install esm model before retarining the SurfDock
-
-
-since we also need the surface information about the protein ,so you can folloing the next links to get the surface information
-
-https://github.com/OptiMaL-PSE-Lab/DeepDock
-https://github.com/LPDI-EPFL/masif
 
 You can follow the steps in ~/SurfDock/bash_scripts/test_scripts/eval_samples.sh to get surface information.
 

@@ -33,7 +33,7 @@ NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
 
 main_process_port=2951${gpu_array[-1]}
-project_name='SurfDock_eval_samples/repeat_1211'
+project_name='SurfDock_eval_samples/repeat_121212'
 surface_out_dir=${SurfDockdir}/data/eval_sample_dirs/${project_name}/test_samples_8A_surface
 data_dir=${SurfDockdir}/data/eval_sample_dirs/test_samples
 out_csv_file=${SurfDockdir}/data/eval_sample_dirs/${project_name}/input_csv_files/test_samples.csv
