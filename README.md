@@ -72,7 +72,7 @@ pip install -e .
 Since we also need the surface information about the protein 
 
 We need to install APBS-3.0.0, pdb2pqr-2.1.1 on the computer. 
-For the convenience of everyone, I packaged the relevant software in/APBS_PDB2PQR.tar.gz and put it in the /comp_surface/tools folder. 
+For the convenience of everyone, I packaged the relevant software in APBS_PDB2PQR.tar.gz and put it in the /comp_surface/tools folder. 
 ```bash
 cd ~/SurfDock/comp_surface/tools
 tar -zxvf APBS_PDB2PQR.tar.gz
