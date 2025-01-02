@@ -11,6 +11,8 @@ This repository contains all code, instructions and model weights necessary to *
 
 2. **We have added a ***Screen Pipeline*** bash script to assist researchers in directly using SurfDock for virtual screening.(~/SurfDock/bash_scripts/test_scripts/screen_pipeline.sh)**
 
+3. **We have updated the installation instructions for data processing dependencies and provided some compressed files of the already processed installation packages for your convenience**
+
 **More infomations in Section 3**
 
 If you have any question, feel free to open an issue or reach out to us: [caodh@zju.edu.cn](caodh@zju.edu.cn).
@@ -60,26 +62,29 @@ pip install dimorphite_dl
 pip install prefetch_generator
 ```
 #### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
-Please also install esm for embeddings
+Since we need esm model to get embedding, we need to install esm model before retarining the SurfDock
 
 ```bash
 git clone https://github.com/facebookresearch/esm 
 cd esm 
 pip install -e .
 ```
-Since we need esm model to get embedding, we need to install esm model before retarining the SurfDock
+Since we also need the surface information about the protein 
 
-Since we also need the surface information about the protein ,so you can folloing the next links to get the surface information
+We need to install APBS-3.0.0, pdb2pqr-2.1.1 on the computer. 
+For the convenience of everyone, I packaged the relevant software in/APBS_PDB2PQR.tar.gz and put it in the /comp_surface/tools folder. 
+```bash
+cd ~/SurfDock/comp_surface/tools
+tar -zxvf APBS_PDB2PQR.tar.gz
+```
+Then set the absolute path of msms_bin, apbs_bin, pdb2pqr_bin, and multivalue_bin directly in the ~/comp_surface/prepare_target/default_config/global_vars.py 
 
-https://github.com/OptiMaL-PSE-Lab/DeepDock
-
-https://github.com/LPDI-EPFL/masif
-
-**Masif & Data processed env dependencies**
+**Data processed env dependencies**
 ```bash
 mamba install mx::reduce
 mamba install conda-forge::openbabel
 ```
+more information in ~/SurfDock/comp_surface/readme.md
 
 ## Section 2 : Dataset
 

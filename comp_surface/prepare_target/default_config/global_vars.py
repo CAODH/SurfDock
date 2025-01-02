@@ -7,7 +7,7 @@ from IPython.core.debugger import set_trace
 epsilon = 1.0e-6
 import sys
 
-os.environ['MSMS_BIN']= "/home/caoduanhua/softwares/transfer/APBS-3.4.1.Linux/bin/msms"
+os.environ['MSMS_BIN']= "~/SurfDock/comp_surface/tools/transfer/APBS-3.4.1.Linux/bin/msms"
 if 'MSMS_BIN' in os.environ:
    msms_bin = os.environ['MSMS_BIN']
 else:
@@ -15,19 +15,19 @@ else:
   print("ERROR: MSMS_BIN not set. Variable should point to MSMS program.")
   sys.exit(1)
 
-os.environ['PDB2PQR_BIN']="/home/caoduanhua/softwares/transfer/pdb2pqr-linux-bin64-2.1.1/pdb2pqr"
+os.environ['PDB2PQR_BIN']="~/SurfDock/comp_surface/tools/transfer/pdb2pqr-linux-bin64-2.1.1/pdb2pqr"
 if 'PDB2PQR_BIN' in os.environ:
    pdb2pqr_bin = os.environ['PDB2PQR_BIN']
 else:
   print("ERROR: PDB2PQR_BIN not set. Variable should point to PDB2PQR_BIN program.")
   sys.exit(1)
-os.environ['APBS_BIN']="/home/caoduanhua/softwares/transfer/APBS-3.4.1.Linux/bin/apbs"
+os.environ['APBS_BIN']="~/SurfDock/comp_surface/tools/transfer/APBS-3.4.1.Linux/bin/apbs"
 if 'APBS_BIN' in os.environ:
    apbs_bin = os.environ['APBS_BIN']
 else:
   print("ERROR: APBS_BIN not set. Variable should point to APBS program.")
   sys.exit(1)
-os.environ['MULTIVALUE_BIN']="/home/caoduanhua/softwares/transfer/APBS-3.4.1.Linux/share/apbs/tools/bin/multivalue"
+os.environ['MULTIVALUE_BIN']="~/SurfDock/comp_surface/tools/transfer/APBS-3.4.1.Linux/share/apbs/tools/bin/multivalue"
 if 'MULTIVALUE_BIN' in os.environ:
    multivalue_bin = os.environ['MULTIVALUE_BIN']
 else:

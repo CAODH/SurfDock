@@ -1,2 +1,4 @@
 # code source
-protein surface process code adapted from : https://github.com/LPDI-EPFL/masif & https://github.com/HannesStark/EquiBind
+ step1. run protein_process/openbabel_reduce_openbabel.py
+ step2. run /comp_surface/prepare_target/computeTargetMesh_test_samples.py (please cd to save_dir to run this python file!)
+ 
