@@ -10,6 +10,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 # tools
+comp_surface/tools/transfer
+comp_surface/tools/transfer/*
 ./comp_surface/tools/transfer
 ./comp_surface/tools/transfer/*
 # log file
