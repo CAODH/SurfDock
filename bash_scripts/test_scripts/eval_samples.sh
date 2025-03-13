@@ -18,7 +18,7 @@ SurfDockdir="$(dirname "$(dirname "$(dirname "$path")")")"
 SurfDockdir=${SurfDockdir}
 echo SurfDockdir : ${SurfDockdir}
 
-temp="$(dirname "$(dirname "$(dirname "$(dirname "$path")")")")"
+temp="$(dirname "$(dirname "$(dirname "$path")")")"
 model_temp="$(dirname "$(dirname "$(dirname "$path")")")"
 
 #------------------------------------------------------------------------------------------------#

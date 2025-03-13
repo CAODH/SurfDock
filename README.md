@@ -52,7 +52,7 @@ mamba install -y pytorch==2.2.2 pytorch-cuda=12.1 -c pytorch -c nvidia
 mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg numpy==1.24.4 scipy==1.8.1 pandas==2.1.2 &&conda clean -ya
 mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg openff-toolkit==0.15.2 openmm==8.1.1 openmmforcefields==0.12.0 pdbfixer==1.9 && conda clean -ya
 mamba install -y --channel=https://conda.anaconda.org/conda-forge --channel=https://conda.anaconda.org/pytorch --channel=https://conda.anaconda.org/pyg babel==2.13.1 biopandas==0.4.1 openbabel==3.1.1 plyfile==1.0.1 prody==2.4.0 torch-ema==0.3 torchmetrics==1.2.1 && conda clean -ya
-mamba install -y pyg -c pyg
+mamba install -y pyg -c pyg --freeze-installed
 pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 pip install -U --no-cache-dir spyrmsd scikit-learn==1.3.2 accelerate==0.15.0 biopython==1.79 e3nn==0.5.1 huggingface-hub==0.17.3 mdanalysis==2.4.0 posebusters==0.2.7 rdkit==2023.3.1 tokenizers==0.13.3 transformers==4.29.2 wandb==0.16.1
 pip install pymesh
@@ -61,8 +61,8 @@ mamba install loguru
 pip install dimorphite_dl
 pip install prefetch_generator
 ```
-#### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
-Since we need esm model to get embedding, we need to install esm model before retarining the SurfDock
+
+Since we need esm model to get embedding, we need to install esm model before retraining the SurfDock
 
 ```bash
 git clone https://github.com/facebookresearch/esm 
@@ -88,16 +88,14 @@ more information in ~/SurfDock/comp_surface/readme.md
 
 ## Section 2 : Dataset
 
-The files in `data` contain the names for the time-based data split.
+The files in `data` contain the names for the time-based data split on PDBBind.
 
-If you want to train one of our models with the data then:
-
-1. download it from [zenodo](https://zenodo.org/record/6408497)
-2. unzip the directory and place it into `data` such that you have the path `data/PDBBind_processed`
+The data preprocessed by EquiBind group on [zenodo](https://zenodo.org/record/6408497) is no longer available due to PDBBind license.
+If you want to train one of our models with PDBBind data, you have to download from the PDBBind website, then process and put it under data/PDBBind_processed
 
 ## Section 3 :  We prepared two examples as appetizers for users , users can follow these scripts to use SurfDock as a SBDD Tool.
 1. Please setup the env dependencies, then cd ~/bash_scripts/test_scripts
-2. Just run the eval_sample.sh script and screen_samples.sh for test SurfDock 
+2. Run the eval_sample.sh script and screen_samples.sh for testing
 
 |   Device |   Speed  | Test Samples  | Sampling conformers/molecule | Output conformers/molecule | Sampling steps|
 |:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
@@ -112,6 +110,10 @@ In our code directory, we write many bash scripts to help user to run SurfDock ,
 pleas run:
 `cd ~/SurfDock/bash_scripts/test_scripts/`
 `bash eval_samples.sh`
+
+#### Tips.1 **if you have some errors about this file ~/yourpath/.../pymesh/lib/libstdc++.so.6，just raname it as libstdc++.so copy.6 or some names like this, since this file not be used in our env**
+
+
 if you want to use the wandb to record the result ,please set the next parameters:
     --wandb 
     --wandb_key your_wandb_key 
@@ -155,11 +157,11 @@ Same as the previous step
 
 
 ## Section 8 : Citation
+Please cite the following article if you find our work helpful:
+
 Cao, D., Chen, M., Zhang, R. et al. SurfDock is a surface-informed diffusion generative model for reliable and accurate protein–ligand complex prediction. Nat Methods (2024). 
 https://doi.org/10.1038/s41592-024-02516-y
 
-
-Cao D, Chen M, Zhang R, et al. SurfDock is a Surface-Informed Diffusion Generative Model for Reliable and Accurate Protein-ligand Complex Prediction[J]. bioRxiv, 2023: 2023.12. 13.571408.
 
 ## Section 9 : License
 

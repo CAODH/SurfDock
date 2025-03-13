@@ -180,5 +180,7 @@ fixed_pdbs/*
 ./*/*.out
 bash_scripts/*/*/*.out
 
+*result*
+
 
 
