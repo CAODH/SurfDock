@@ -18,6 +18,8 @@ from score_in_place_dataset.score_dataset import ScreenDataset
 from utils.utils import get_model
 from tqdm import tqdm
 from loguru import logger
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="torch.jit")
 RDLogger.DisableLog('rdApp.*')
 import yaml
 cache_name = datetime.now().strftime('date%d-%m_time%H-%M-%S.%f')

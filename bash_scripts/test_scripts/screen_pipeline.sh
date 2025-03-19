@@ -12,7 +12,7 @@ cat << 'EOF'
 EOF
                                                                                                        
 # This script is used to run SurfDock on test samples
-source ~/miniforge3/bin/activate SurfDock
+source ~/miniforge3/bin/activate SurfDcokBlind
 path=$(readlink -f "$0")
 SurfDockdir="$(dirname "$(dirname "$(dirname "$path")")")"
 SurfDockdir=${SurfDockdir}
@@ -26,19 +26,29 @@ model_temp="$(dirname "$(dirname "$(dirname "$path")")")"
 #------------------------------------------------------------------------------------------------#
 
 export precomputed_arrays="${temp}/precomputed/precomputed_arrays"
-gpu_string="0"
+## Please set the GPU devices you want to use
+gpu_string="3"
 echo "Using GPU devices: ${gpu_string}"
 IFS=',' read -ra gpu_array <<< "$gpu_string"
 NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
-
+## Please set the main Parameters
 main_process_port=2951${gpu_array[-1]}
-project_name='SurfDock_Screen_samples/repeat_zero'
+## Please set the project name
+project_name='SurfDock_Screen_samples/repeat_2'
+# /home/caoduanhua/NM_submit_code/SurfDock
+## Please set the path to save the surface file and pocket file
 surface_out_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_8A_surface
+## Please set the path to the input data
 data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
+## Please set the path to the output csv file
 out_csv_file=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/input_csv_files/test_samples.csv
+## Please set the path to the esmbedding file
 esmbedding_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_esmbedding
-# project_name='SurfDock_Screen_samples/repeat5'
+## Please set the path to the Screen ligand library file
+Screen_lib_path=${SurfDockdir}/data/Screen_sample_dirs/test_samples/1a0q/1a0q_ligand_for_Screen.sdf
+## Please set the path to the docking result directory
+docking_out_dir=${temp}/docking_result/${project_name}
 
 #------------------------------------------------------------------------------------------------#
 #----------------------------- Step1 : Compute Target Surface -----------------------------------#
@@ -47,7 +57,7 @@ echo '----------------------------- Step1 : Compute Target Surface -------------
 mkdir -p $surface_out_dir
 cd $surface_out_dir
 command=`
-python ${SurfDockdir}/comp_surface/prepare_target/computeTargetMesh_test_samples.py \
+python ${SurfDockdir}/comp_surface/prepare_target/computeTargetMesh_test_samples.py   \
 --data_dir ${data_dir} \
 --out_dir ${surface_out_dir} \
 `
@@ -63,7 +73,7 @@ ${SurfDockdir}/inference_utils/construct_csv_input.py \
 --data_dir ${data_dir} \
 --surface_out_dir ${surface_out_dir} \
 --output_csv_file ${out_csv_file} \
---Screen_ligand_library_file ${SurfDockdir}/data/Screen_sample_dirs/test_samples/1a0q/1a0q_ligand_for_Screen.sdf \
+--Screen_ligand_library_file ${Screen_lib_path} \
 `
 state=$command
 
@@ -141,7 +151,7 @@ ${SurfDockdir}/inference_accelerate.py \
 --esm_embeddings_path ${protein_embedding} \
 --run_name ${confidence_model_base_dir}_test_dist_${mdn_dist_threshold_test} \
 --project ${project_name} \
---out_dir ${temp}/docking_result/${project_name} \
+--out_dir ${docking_out_dir} \
 --batch_size 400 \
 --batch_size_molecule 10 \
 --samples_per_complex 40 \
@@ -167,9 +177,9 @@ ${SurfDockdir}/inference_utils/construct_csv_input.py \
 --data_dir ${data_dir} \
 --surface_out_dir ${surface_out_dir} \
 --output_csv_file ${out_csv_file} \
---Screen_ligand_library_file ${SurfDockdir}/data/Screen_sample_dirs/test_samples/1a0q/1a0q_ligand_for_Screen.sdf \
+--Screen_ligand_library_file ${Screen_lib_path} \
 --is_docking_result_dir \
---docking_result_dir ${temp}/docking_result/${project_name} \
+--docking_result_dir ${docking_out_dir} \
 `
 state=$command
 
@@ -178,7 +188,7 @@ confidence_model_base_dir=${model_temp}/model_weights/screen
 test_data_csv=${out_csv_file}
 
 version=6
-dist_arrays=(5)
+dist_arrays=(3)
 for i in ${dist_arrays[@]}
 do
 mdn_dist_threshold_test=${i}
@@ -197,7 +207,7 @@ ${SurfDockdir}/evaluate_score_in_place.py \
 --esm_embeddings_path ${protein_embedding} \
 --run_name ${project_name}_test_dist_${mdn_dist_threshold_test} \
 --project ${project_name} \
---out_dir ${temp}/docking_result/${project_name} \
+--out_dir ${docking_out_dir} \
 --batch_size 40 \
 --wandb_dir ${temp}/wandb/test_workdir`
 state=$command
