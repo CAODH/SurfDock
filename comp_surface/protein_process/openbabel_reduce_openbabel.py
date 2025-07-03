@@ -33,7 +33,7 @@ def main(data_path,save_path):
                 f"reduce -Trim {rec_path} > {os.path.join(save_path, name, f'{name}_protein_processed_obabel_tmp.pdb')}", shell=True)
 
             return_code2 = subprocess.run(
-                f"reduce -HIS {os.path.join(save_path, name, f'{name}_protein_processed_obabel_tmp.pdb')} > {os.path.join(data_path, name, f'{name}_protein_processed_obabel_reduce.pdb')}", shell=True)
+                f"reduce -HIS {os.path.join(save_path, name, f'{name}_protein_processed_obabel_tmp.pdb')} > {os.path.join(save_path, name, f'{name}_protein_processed_obabel_reduce.pdb')}", shell=True)
 
             return_code2 = subprocess.run(
                 f"rm {os.path.join(save_path, name, f'{name}_protein_processed_obabel_tmp.pdb')}",
