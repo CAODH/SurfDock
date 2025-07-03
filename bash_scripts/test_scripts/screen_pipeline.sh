@@ -12,7 +12,7 @@ cat << 'EOF'
 EOF
                                                                                                        
 # This script is used to run SurfDock on test samples
-source ~/miniforge3/bin/activate SurfDcokBlind
+source ~/miniforge3/bin/activate SurfDock
 path=$(readlink -f "$0")
 SurfDockdir="$(dirname "$(dirname "$(dirname "$path")")")"
 SurfDockdir=${SurfDockdir}
@@ -27,46 +27,62 @@ model_temp="$(dirname "$(dirname "$(dirname "$path")")")"
 
 export precomputed_arrays="${temp}/precomputed/precomputed_arrays"
 ## Please set the GPU devices you want to use
-gpu_string="3"
+gpu_string="7"
 echo "Using GPU devices: ${gpu_string}"
 IFS=',' read -ra gpu_array <<< "$gpu_string"
 NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
 ## Please set the main Parameters
-main_process_port=2951${gpu_array[-1]}
+main_process_port=2957${gpu_array[-1]}
 ## Please set the project name
-project_name='SurfDock_Screen_samples/repeat_2'
+project_name='SurfDock_Screen_samples_skip_target_processed'
 # /home/caoduanhua/NM_submit_code/SurfDock
+# Set default value for target_have_processed if not already set
+target_have_processed=${target_have_processed:-true}
 ## Please set the path to save the surface file and pocket file
-surface_out_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_8A_surface
+surface_out_dir=${temp}/Screen_result/processed_data/${project_name}/test_samples_8A_surface
 ## Please set the path to the input data
 data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
 ## Please set the path to the output csv file
-out_csv_file=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/input_csv_files/test_samples.csv
+out_csv_dir=${temp}/Screen_result/processed_data/${project_name}/input_csv_files/
+out_csv_file=${out_csv_dir}/test_samples.csv
 ## Please set the path to the esmbedding file
-esmbedding_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_esmbedding
+esmbedding_dir=${temp}/Screen_result/processed_data/${project_name}/test_samples_esmbedding
 ## Please set the path to the Screen ligand library file
 Screen_lib_path=${SurfDockdir}/data/Screen_sample_dirs/test_samples/1a0q/1a0q_ligand_for_Screen.sdf
 ## Please set the path to the docking result directory
-docking_out_dir=${temp}/docking_result/${project_name}
+docking_out_dir=${temp}/Screen_result/docking_result/${project_name}
+#------------------------------------------------------------------------------------------------#
+# -----------------------Step1 : Processed Target Structure -------------------------------------#
+#----------------(Set target_have_processed as true if you have done with your pipeline)---------#
+#------------------------------------------------------------------------------------------------#
+mkdir -p $surface_out_dir
+if [ "$target_have_processed" = true ]; then
+  echo "Target structure has been processed, skipping this step."
+else
+  echo "Processing target structure with OpenBabel..."
+  export BABEL_LIBDIR=~/miniforge3/envs/SurfDock/lib/openbabel/3.1.0
+  command=`
+  python ${SurfDockdir}/comp_surface/protein_process/openbabel_reduce_openbabel.py \
+  --data_path ${data_dir} \
+  --save_path ${surface_out_dir}`
+  state=$command
+fi
 
 #------------------------------------------------------------------------------------------------#
-#----------------------------- Step1 : Compute Target Surface -----------------------------------#
+#----------------------------- Step2 : Compute Target Surface -----------------------------------#
 #------------------------------------------------------------------------------------------------#
-echo '----------------------------- Step1 : Compute Target Surface -----------------------------------'
-mkdir -p $surface_out_dir
 cd $surface_out_dir
 command=`
-python ${SurfDockdir}/comp_surface/prepare_target/computeTargetMesh_test_samples.py   \
+python ${SurfDockdir}/comp_surface/prepare_target/computeTargetMesh_test_samples.py \
 --data_dir ${data_dir} \
 --out_dir ${surface_out_dir} \
 `
 state=$command
 
 #------------------------------------------------------------------------------------------------#
-#--------------------------------  Step2 : Get Input CSV File -----------------------------------#
+#--------------------------------  Step3 : Get Input CSV File -----------------------------------#
 #------------------------------------------------------------------------------------------------#
-echo '--------------------------------  Step2 : Get Input CSV File -----------------------------------'
 
 command=` python \
 ${SurfDockdir}/inference_utils/construct_csv_input.py \
@@ -78,9 +94,8 @@ ${SurfDockdir}/inference_utils/construct_csv_input.py \
 state=$command
 
 #------------------------------------------------------------------------------------------------#
-#--------------------------------  Step3 : Get Pocket ESM Embedding  ----------------------------#
+#--------------------------------  Step4 : Get Pocket ESM Embedding  ----------------------------#
 #------------------------------------------------------------------------------------------------#
-echo '--------------------------------  Step3 : Get Pocket ESM Embedding  ----------------------------'
 
 esm_dir=${SurfDockdir}/esm
 sequence_out_file="${esmbedding_dir}/test_samples.fasta"
@@ -119,10 +134,8 @@ command=`python ${SurfDockdir}/datasets/esm_pocket_embeddings_to_pt.py \
 state=$command
 
 #------------------------------------------------------------------------------------------------#
-#---------------- Step3 : Start Sampling Ligand Confromers without Force Optimize  -----------------#
+#------------------------  Step5 : Start Sampling Ligand Confromers  ----------------------------#
 #------------------------------------------------------------------------------------------------#
-echo '---------------- Attention : Start Sampling Ligand Confromers with Force Optimize  -----------------'
-echo '---------------- If you want to minimized top 10 pose as we do in paper please use the script in ~/SurfDock/force_optimize  -----------------'
 
 diffusion_model_dir=${model_temp}/model_weights/docking
 confidence_model_base_dir=${model_temp}/model_weights/posepredict
@@ -163,14 +176,14 @@ ${SurfDockdir}/inference_accelerate.py \
 state=$command
 done
 #------------------------------------------------------------------------------------------------#
-#---------------- Step4 : Start Rescoring the Pose For Screening  -----------------#
+#---------------- Step6 : Start Rescoring the Pose For Screening  -----------------#
 #------------------------------------------------------------------------------------------------#
 echo '---------------- Step4 : Start Rescoring the Pose For Screening  -----------------'
-project_name='SurfDock_Screen_samples/repeat_zero'
+# project_name='SurfDock_Screen_samples/repeat_zero'
 
 # surface_out_dir=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/test_samples_8A_surface
 # data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
-out_csv_file=${SurfDockdir}/data/Screen_sample_dirs/${project_name}/input_csv_files/score_inplace.csv
+out_csv_file=${out_csv_dir}/score_inplace.csv
 
 command=` python \
 ${SurfDockdir}/inference_utils/construct_csv_input.py \

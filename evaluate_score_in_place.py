@@ -49,6 +49,36 @@ args = parser.parse_args()
 
 
 def main_function():
+    """
+    Main function for evaluating scores in place using a confidence model.
+    This function performs the following tasks:
+    1. Loads configuration settings from a YAML file if provided.
+    2. Sets up output directories and initializes logging.
+    3. Loads a pre-trained confidence model and its parameters.
+    4. Reads input data from a CSV file and processes it using a dataset and dataloader.
+    5. Evaluates the confidence model on the input data and generates predictions.
+    6. Saves the results to a CSV file and optionally logs them to Weights & Biases (wandb).
+    Result CSV Columns:
+    - `sdf_name`: The name of the SDF file associated with the molecule.
+    - `screen_confidence(for molecule rank)`: The confidence score for ranking molecules.
+    - `confidence_name`: The name of the confidence prediction, including detailed metadata.
+    - `pose_prediction_confidence(for pose rank)`: The confidence score for ranking poses, extracted from `confidence_name`.
+    - `pose_sample_idx`: The sample index of the pose, extracted from `confidence_name`.
+    - `pose_rank`: The rank of the pose, extracted from `confidence_name`.
+    - `molecule_name`: The name of the molecule, extracted from `confidence_name`.
+    - `molecule_idx_in_input_file`: The index of the molecule in the input file, extracted from `confidence_name`.
+    Notes:
+    - The function uses the `accelerator` library for distributed processing.
+    - The `wandb` library is used for experiment tracking if enabled.
+    - The confidence model is loaded and evaluated in a no-gradient mode (`torch.no_grad()`).
+    - Errors during processing of individual ligands are logged and skipped.
+    Outputs:
+    - A CSV file containing the results is saved in the specified output directory.
+    - A `Readme.txt` file is generated with metadata about the run.
+    - Optionally, results are logged to Weights & Biases (wandb).
+    Raises:
+    - Exceptions during ligand processing are caught and logged without halting the execution.
+    """
     if args.config:
         config_dict = yaml.load(args.config, Loader=yaml.FullLoader)
         arg_dict = args.__dict__
@@ -156,9 +186,25 @@ def main_function():
         pbar.set_description('screen time used: {:.2f} '.format(time.time()-start_time))
     logger.info('screen time used: ',time.time()-start_time)
     if accelerator.is_local_main_process:
-        result = pd.DataFrame({'sdf_name':sdf_names,'confidence':confidence,'confidence_name':confidence_names})
+        result = pd.DataFrame({'sdf_name':sdf_names,'screen_confidence(for molecule rank)':confidence,'pose_file_path':confidence_names})
         csv_flag = os.path.basename(args.data_csv).split('.')[0]
+        result['pose_prediction_confidence(for pose rank)'] = result['pose_file_path'].apply(lambda x: float(x.split('_')[-1].split('.sdf')[0]))
+        result['pose_sample_idx'] = result['pose_file_path'].apply(lambda x: float(x.split('sample_idx_')[-1].split('_rank')[0]))
+        result['pose_rank'] = result['pose_file_path'].apply(lambda x: float(x.split('_rank_')[-1].split('_confidence_')[0]))
+        result['molecule_name'] = result['pose_file_path'].apply(lambda x: x.split('.sdf_file_inner_idx_')[0].split('/')[-1])
+        result['molecule_idx_in_input_file'] = result['pose_file_path'].apply(lambda x: float(x.split('sdf_file_inner_idx_')[-1].split('_sample_idx_')[0]))
         result.to_csv(f'{args.out_dir}/{csv_flag}_confidence.csv',index=False)
+        with open(f"{args.out_dir}/Readme.txt", 'w') as f:
+            f.write(f"""Result CSV Columns:
+        - `sdf_name`: The name of the SDF file associated with the molecule.
+        - `screen_confidence(for molecule rank)`: The confidence score for ranking molecules to screen a library.
+        - `pose_file_path`: The path of the SDF file associated with the molecule, including detailed metadata.
+        - `pose_prediction_confidence(for pose rank)`: The confidence score for ranking poses, extracted from `pose_file_path`.
+        - `pose_sample_idx`: The sample index of the pose, extracted from `pose_file_path`.
+        - `pose_rank`: The rank of the pose, extracted from `pose_file_path`.
+        - `molecule_name`: The name of the molecule, extracted from `pose_file_path`.
+        - `molecule_idx_in_input_file`: The index of the molecule in the input file, extracted from `pose_file_path`.
+        """)
             # np.save(f'{args.out_dir}/confidence.npy', confidence)
     if args.wandb:
             wandb.finish()

@@ -86,7 +86,7 @@ parser.add_argument('--mdn_dist_threshold_test', type=float, default=3.0, help='
 args = parser.parse_args()
 nowtime = datetime.now().strftime('%Y-%m-%d')
 log_file_flag = '-'.join(args.project.split('/'))
-logger.add(f'./log-inference-{log_file_flag}-{nowtime}.log', rotation="500MB")
+logger.add(f'{os.path.dirname(args.out_dir)}/log-inference-{log_file_flag}-{nowtime}.log', rotation="500MB")
 logger.info('Runing inference script in path: {}',os.getcwd())
 logger.info('Runing inference with args: {}',args)
 

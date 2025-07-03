@@ -4,9 +4,17 @@
 Implementation of SurfDock, by Duanhua Cao & Mingan Chen.
 
 This repository contains all code, instructions and model weights necessary to **Generative Reliable and Accurate Protein-ligand Complex and Screen Compounds** by SurfDock, eval SurfDock or to retrain a new model.
-### 🔔 News
 ***With just a few adjustments to the input files based on your needs, you can seamlessly leverage the advanced diffusion model for structure-based virtual screening!***
+### 🔔 News (20250703)
+**We have updated ***Screen Pipeline*** bash script(~/SurfDock/bash_scripts/test_scripts/screen_pipeline.sh)**
+    
+    a. **🛠️ Added target processing step in the script**: The `screen_pipeline.sh` script now includes a step (optional) to process the target structure before running the screening pipeline. Please ensure your target files are correctly formatted and placed in the appropriate directory.
 
+    b. **🛠️ Enhanced result details in `score_in_place` result file**: This provides users with more comprehensive insights into the screening results.
+
+    c. **🛠️Added a README file in the result directory**: A `Readme.txt` file has been added to the result directory to help users understand the information in the CSV file. It includes descriptions of each column.
+
+### 🔔 News (202502)
 1. **We have updated the README file to include instructions for the installation scripts.**
 
 2. **We have added a ***Screen Pipeline*** bash script to assist researchers in directly using SurfDock for virtual screening.(~/SurfDock/bash_scripts/test_scripts/screen_pipeline.sh)**

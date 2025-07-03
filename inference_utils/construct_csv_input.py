@@ -20,7 +20,7 @@ from tqdm import tqdm
 args_list=defaultdict(list)
 proteins = [i for i in os.listdir(args.surface_out_dir) if os.path.isdir(os.path.join(args.surface_out_dir, i)) ]
 for protein in tqdm(proteins ):
-        target_filename = os.path.join(args.data_dir,protein,f'{protein}_protein_processed_obabel_reduce_obabel.pdb')
+        target_filename = os.path.join(args.surface_out_dir,protein,f'{protein}_protein_processed_obabel_reduce_obabel.pdb')
         if not os.path.exists(target_filename):
             target_filename = os.path.join(args.data_dir,protein,f'{protein}_protein_processed.pdb')
         if not os.path.exists(target_filename):
@@ -33,12 +33,15 @@ for protein in tqdm(proteins ):
             ligand_filename = args.Screen_ligand_library_file
         
         if os.path.exists(ref_ligand_filename):
-
-            pocket = os.path.join(args.surface_out_dir, protein, f'{protein}_protein_processed_8A.pdb')
-            surface = os.path.join(args.surface_out_dir, protein, f'{protein}_protein_processed_8A.ply')
-            
+        
+            pocket = os.path.join(args.surface_out_dir, protein, f'{protein}_protein_processed_obabel_reduce_obabel_8A.pdb')
+            surface = os.path.join(args.surface_out_dir, protein, f'{protein}_protein_processed_obabel_reduce_obabel_8A.ply')
+            if not os.path.exists(pocket):
+                pocket = os.path.join(args.surface_out_dir, protein, f'{protein}_protein_processed_8A.pdb')
+            if not os.path.exists(surface):
+                surface = os.path.join(args.surface_out_dir, protein, f'{protein}_protein_processed_8A.ply')
+                
             if os.path.exists(pocket) and os.path.exists(surface):
-
                 args_list['protein_path'].append(target_filename)
                 args_list['pocket_path'].append(pocket)
                 args_list['ref_ligand'].append(ref_ligand_filename)

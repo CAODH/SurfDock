@@ -18,7 +18,7 @@ SurfDockdir="$(dirname "$(dirname "$(dirname "$path")")")"
 SurfDockdir=${SurfDockdir}
 echo SurfDockdir : ${SurfDockdir}
 
-temp="$(dirname "$(dirname "$(dirname "$path")")")"
+temp="$(dirname "$(dirname "$(dirname "$(dirname "$path")")")")"
 model_temp="$(dirname "$(dirname "$(dirname "$path")")")"
 
 #------------------------------------------------------------------------------------------------#
@@ -31,15 +31,34 @@ echo "Using GPU devices: ${gpu_string}"
 IFS=',' read -ra gpu_array <<< "$gpu_string"
 NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
-
 main_process_port=2951${gpu_array[-1]}
-project_name='SurfDock_eval_samples/repeat_250102'
-surface_out_dir=${SurfDockdir}/data/eval_sample_dirs/${project_name}/test_samples_8A_surface
-data_dir=${SurfDockdir}/data/eval_sample_dirs/test_samples
-out_csv_file=${SurfDockdir}/data/eval_sample_dirs/${project_name}/input_csv_files/test_samples.csv
-esmbedding_dir=${SurfDockdir}/data/eval_sample_dirs/${project_name}/test_samples_esmbedding
-# project_name='SurfDock_Screen_samples/repeat5'
 
+project_name='SurfDock_eval_samples_skip_target_processed'
+## Please set the path to the input data
+data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
+esmbedding_dir=${temp}/Eval_result/processed_data/${project_name}/test_samples_esmbedding
+# Set default value for target_have_processed if not already set
+target_have_processed=${target_have_processed:-true}
+## Please set the path to save the surface file and pocket file
+surface_out_dir=${temp}/Eval_result/processed_data/${project_name}/test_samples_8A_surface
+## Please set the path to the output csv file
+out_csv_dir=${temp}/Eval_result/processed_data/${project_name}/input_csv_files/
+out_csv_file=${out_csv_dir}/test_samples.csv
+# project_name='SurfDock_Screen_samples/repeat5'
+docking_out_dir=${temp}/Eval_result/docking_result/${project_name}
+
+mkdir -p $surface_out_dir
+if [ "$target_have_processed" = true ]; then
+  echo "Target structure has been processed, skipping this step."
+else
+  echo "Processing target structure with OpenBabel..."
+  export BABEL_LIBDIR=~/miniforge3/envs/SurfDock/lib/openbabel/3.1.0
+  command=`
+  python ${SurfDockdir}/comp_surface/protein_process/openbabel_reduce_openbabel.py \
+  --data_path ${data_dir} \
+  --save_path ${surface_out_dir}`
+  state=$command
+fi
 #------------------------------------------------------------------------------------------------#
 #----------------------------- Step1 : Compute Target Surface -----------------------------------#
 #------------------------------------------------------------------------------------------------#
@@ -138,7 +157,7 @@ ${SurfDockdir}/inference_accelerate.py \
 --esm_embeddings_path ${protein_embedding} \
 --run_name ${confidence_model_base_dir}_test_dist_${mdn_dist_threshold_test} \
 --project ${project_name} \
---out_dir ${temp}/docking_result/${project_name} \
+--out_dir ${docking_out_dir} \
 --batch_size 40 \
 --batch_size_molecule 1 \
 --samples_per_complex 40 \
