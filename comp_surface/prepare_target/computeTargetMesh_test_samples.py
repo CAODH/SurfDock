@@ -231,7 +231,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--data_dir', type=str, default='~/SurfDock/data/test_samples', help='')
     parser.add_argument('--out_dir', type=str, default='~/SurfDock/data/test_samples_8A_surface', help='')
-    parser.add_argument('--pools', type=int, default=1, help='')
+    parser.add_argument('--n_jobs',type=int, default=1, help='Number of parallel jobs (-1 for all CPUs)')
     args = parser.parse_args()
     os.makedirs(args.out_dir,exist_ok=True)
 
@@ -252,7 +252,7 @@ if __name__ == "__main__":
                 ligand_filename = os.path.join(args.data_dir,protein,f'{protein}_ligand.mol2')
             args_list.append((target_filename,ligand_filename))
     print(f'number {len(args_list)} need to processed.....')
-    results = Parallel(n_jobs = 30,backend = 'multiprocessing')(delayed(compute_inp_surface)(target_filename, ligand_filename,args.out_dir, dist_threshold=8) for (target_filename, ligand_filename) in tqdm(args_list))
+    results = Parallel(n_jobs = args.n_jobs,backend = 'multiprocessing')(delayed(compute_inp_surface)(target_filename, ligand_filename,args.out_dir, dist_threshold=8) for (target_filename, ligand_filename) in tqdm(args_list))
     # print(results)
     # Find all files in args.out_dir that end with _temp
     

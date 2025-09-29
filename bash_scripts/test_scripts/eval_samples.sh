@@ -32,7 +32,7 @@ IFS=',' read -ra gpu_array <<< "$gpu_string"
 NUM_GPUS=${#gpu_array[@]}
 export CUDA_VISIBLE_DEVICES=${gpu_string}
 main_process_port=2951${gpu_array[-1]}
-
+n_jobs=30
 project_name='SurfDock_eval_samples_skip_target_processed'
 ## Please set the path to the input data
 data_dir=${SurfDockdir}/data/Screen_sample_dirs/test_samples
@@ -56,7 +56,9 @@ else
   command=`
   python ${SurfDockdir}/comp_surface/protein_process/openbabel_reduce_openbabel.py \
   --data_path ${data_dir} \
-  --save_path ${surface_out_dir}`
+  --save_path ${surface_out_dir} \
+  --n_jobs ${n_jobs} \
+  `
   state=$command
 fi
 #------------------------------------------------------------------------------------------------#
@@ -69,6 +71,7 @@ command=`
 python ${SurfDockdir}/comp_surface/prepare_target/computeTargetMesh_test_samples.py \
 --data_dir ${data_dir} \
 --out_dir ${surface_out_dir} \
+--n_jobs ${n_jobs} \
 `
 state=$command
 
