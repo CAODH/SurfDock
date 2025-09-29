@@ -35,7 +35,7 @@ def compute_inp_surface(target_filename, ligand_filename,out_dir = None, dist_th
             sufix = '/' + os.path.splitext(target_filename)[0].split('/')[-1] + '_'+str(dist_threshold)+'A.pdb'
         else:
             out_filename = os.path.splitext(ligand_filename)[0]
-        if os.path.exists(out_filename+f"/{sufix.split('.')[0]}.ply"):
+        if os.path.exists(out_filename+f"/{sufix.split('.pdb')[0]}.ply"):
             print('have done skip!')
             return 0
         input_filename = os.path.splitext(target_filename)[0]
@@ -214,7 +214,7 @@ def compute_inp_surface(target_filename, ligand_filename,out_dir = None, dist_th
         si = np.arctan(si)*(2/np.pi)
         
         # Convert to ply and save.
-        save_ply(out_filename+f"/{sufix.split('.')[0]}.ply", regular_mesh.vertices,\
+        save_ply(out_filename+f"/{sufix.split('.pdb')[0]}.ply", regular_mesh.vertices,\
                 regular_mesh.faces, normals=vertex_normal, charges=vertex_charges,\
                 normalize_charges=True, hbond=vertex_hbond, hphob=vertex_hphobicity,\
                 si=si)
